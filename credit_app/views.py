@@ -71,11 +71,9 @@ class CheckEligibilityView(APIView):
 
         credit_score = calculate_credit_score(customer)
 
-        # Calculate current active EMIs
         active_loans = [l for l in customer.loans.all() if l.is_active]
         current_emis = sum(l.monthly_repayment for l in active_loans)
 
-        # New loan EMI (using requested interest rate)
         new_emi = calculate_monthly_installment(
             data['loan_amount'], data['interest_rate'], data['tenure']
         )
@@ -85,7 +83,6 @@ class CheckEligibilityView(APIView):
             credit_score, data['interest_rate'], total_emis, customer.monthly_salary
         )
 
-        # Recalculate EMI with corrected rate if changed
         final_emi = calculate_monthly_installment(
             data['loan_amount'], corrected_rate, data['tenure']
         )
@@ -143,14 +140,12 @@ class CreateLoanView(APIView):
         )
 
         start_date = date.today()
-        # Calculate end date: tenure in months
         end_month = start_date.month + data['tenure']
         end_year = start_date.year + (end_month - 1) // 12
         end_month = ((end_month - 1) % 12) + 1
         try:
             end_date = start_date.replace(year=end_year, month=end_month)
         except ValueError:
-            # Handle month-end edge cases
             import calendar
             last_day = calendar.monthrange(end_year, end_month)[1]
             end_date = start_date.replace(year=end_year, month=end_month, day=last_day)
@@ -210,7 +205,7 @@ class ViewLoansView(APIView):
         except Customer.DoesNotExist:
             return Response({'error': 'Customer not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        active_loans = [l for l in customer.loans.all() if l.is_active]
+        active_loans = [loans for loans in customer.loans.all() if loans.is_active]
 
         result = []
         for loan in active_loans:
