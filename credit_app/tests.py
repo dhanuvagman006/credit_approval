@@ -38,7 +38,6 @@ class CreditScoreTest(TestCase):
 
     def test_debt_exceeds_limit_returns_zero(self):
         self.customer.current_debt = 0
-        # Create active loan exceeding approved limit
         Loan.objects.create(
             customer=self.customer,
             loan_amount=2000000,
@@ -52,7 +51,6 @@ class CreditScoreTest(TestCase):
         self.assertEqual(score, 0)
 
     def test_score_with_good_history(self):
-        # Past loan, fully paid on time
         Loan.objects.create(
             customer=self.customer,
             loan_amount=100000,
@@ -88,7 +86,7 @@ class GetLoanApprovalTest(TestCase):
         self.assertFalse(approved)
 
     def test_emi_exceeds_50_percent_rejected(self):
-        # EMI = 26000, salary = 50000 → 52% > 50%
+                # EMI = 26000, salary = 50000 → 52% > 50%
         approved, rate, msg = get_loan_approval(80, 10, 26000, 50000)
         self.assertFalse(approved)
 
@@ -108,7 +106,7 @@ class RegisterAPITest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         data = response.json()
         self.assertIn('customer_id', data)
-        self.assertEqual(data['approved_limit'], 1800000)  # 36 * 50000 = 1800000
+        self.assertEqual(data['approved_limit'], 1800000)  
 
     def test_register_approved_limit_rounded_to_lakh(self):
         response = self.client.post('/register', {
@@ -120,7 +118,6 @@ class RegisterAPITest(TestCase):
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         data = response.json()
-        # 36 * 47000 = 1692000 → rounded to nearest lakh = 1700000
         self.assertEqual(data['approved_limit'], 1700000)
 
     def test_register_missing_fields(self):

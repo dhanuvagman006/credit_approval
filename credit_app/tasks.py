@@ -112,7 +112,7 @@ def ingest_loan_data(self, file_path=None):
                 continue
             with connection.cursor() as cursor:
                 cursor.execute("SELECT setval('loans_loan_id_seq', (SELECT MAX(loan_id) FROM loans));")
-            # Parse dates
+           
             def parse_date(d):
                 if d is None:
                     return None
